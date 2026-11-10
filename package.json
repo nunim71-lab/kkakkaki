@@ -1,0 +1,17 @@
+{
+  "name": "kkakkaki",
+  "version": "1.0.0",
+  "build": "1.0",
+  "private": true,
+  "description": "깍깍이 - 내 휴대폰 번호로 문자를 보내주는 까마귀 (재잘이의 동생 앱)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "license": "MIT"
+}

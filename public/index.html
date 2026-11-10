@@ -1,0 +1,1299 @@
+<!doctype html>
+<html lang="ko" data-theme="black-gold">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>깍깍이</title>
+<link rel="icon" href="/icon.png?v=1.0">
+<script>
+  // 고른 색상 테마를 화면이 그려지기 전에 적용 (깜빡임 방지)
+  try { document.documentElement.dataset.theme = localStorage.getItem('kkakkaki-theme') || 'black-gold'; } catch {}
+</script>
+<style>
+  /* ===== 색상 테마 (재잘이와 같은 5가지, 설정 → 색상 테마에서 고름) ===== */
+  :root, [data-theme="purple"] {
+    --navy:#2a2350; --navy2:#3b3168; --tb3:#5a46b8; --accent:#7c5cf0; --accent2:#a58bff; --pink:#ff8fc2; --edge:#6a3fc7; --on-accent:#fff;
+    --bg:#f6f3ff; --card:#fff; --line:#e9e3fb; --text:#2d2650; --muted:#8b84a8; --ink:#4b4370;
+    --soft:#f1edff; --soft2:#ece7ff; --soft3:#faf8ff; --side-text:#c9c1ee;
+    --body1:#ffd9ec; --body2:#d6e6ff; --body3:#efeaff; --fb1:#5a4aa8; --screen:#eef3ff;
+  }
+  [data-theme="black-gold"] {
+    --navy:#1c1b22; --navy2:#2b2a33; --tb3:#3d3a48; --accent:#e0a91f; --accent2:#ffd166; --pink:#ffe08a; --edge:#a87a0d; --on-accent:#24232b;
+    --bg:#f7f6f2; --card:#fff; --line:#ebe6d8; --text:#24232b; --muted:#8a8678; --ink:#4a4757;
+    --soft:#f3efe2; --soft2:#ece6d3; --soft3:#fbfaf6; --side-text:#bdb9c9;
+    --body1:#fff1c7; --body2:#e8e6ef; --body3:#f2f0ea; --fb1:#4a4858; --screen:#f4f2ec;
+  }
+  [data-theme="mint"] {
+    --navy:#0f3b3a; --navy2:#145250; --tb3:#1d6b66; --accent:#0d9488; --accent2:#5eead4; --pink:#6ee7b7; --edge:#0b6d63; --on-accent:#fff;
+    --bg:#f1fbf8; --card:#fff; --line:#d7efe8; --text:#123c3a; --muted:#6f8f8b; --ink:#2f5a56;
+    --soft:#e3f6f1; --soft2:#d6f0e9; --soft3:#f7fdfb; --side-text:#b6dcd6;
+    --body1:#d7f7ea; --body2:#dff1ff; --body3:#ecf8f4; --fb1:#1d6b66; --screen:#eef8f5;
+  }
+  [data-theme="coral"] {
+    --navy:#4a2c2a; --navy2:#6b3d36; --tb3:#8f4e42; --accent:#ff7a59; --accent2:#ffa48a; --pink:#ffc27a; --edge:#cf5235; --on-accent:#fff;
+    --bg:#fff8f3; --card:#fff; --line:#f5e1d6; --text:#3d2622; --muted:#a08378; --ink:#6a4a42;
+    --soft:#fff0e6; --soft2:#fde6d8; --soft3:#fffbf8; --side-text:#f1cfc4;
+    --body1:#ffe2d1; --body2:#fff3c9; --body3:#fff4ec; --fb1:#8f4e42; --screen:#fff3ec;
+  }
+  [data-theme="sky"] {
+    --navy:#13294b; --navy2:#1d3d6e; --tb3:#2a5aa0; --accent:#3b82f6; --accent2:#7cb3ff; --pink:#67e8f9; --edge:#1d4fbf; --on-accent:#fff;
+    --bg:#f3f8ff; --card:#fff; --line:#dce8fb; --text:#172b4d; --muted:#7487a6; --ink:#3a4e72;
+    --soft:#e8f1ff; --soft2:#dde9ff; --soft3:#f8fbff; --side-text:#b9cdee;
+    --body1:#d9f3ff; --body2:#e2e5ff; --body3:#edf4ff; --fb1:#2a5aa0; --screen:#eef4ff;
+  }
+  :root { --ok:#16a34a; --err:#e11d48; --warn:#b45309; }
+
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; }
+  body {
+    /* 전체 글꼴: 맑은 고딕 */
+    font:14px/1.55 "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", system-ui, sans-serif; color:var(--text);
+    background:radial-gradient(circle at 15% 10%, var(--body1) 0, transparent 40%), radial-gradient(circle at 90% 90%, var(--body2) 0, transparent 45%), var(--body3);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  button, input, textarea, select { font:inherit; color:inherit; }
+  .hidden { display:none !important; }
+
+  /* ===== 앱 창 ===== */
+  .window { width:100vw; height:100vh; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+  @media (min-width:1180px) and (min-height:820px) {
+    .window { width:1100px; height:780px; border-radius:22px; box-shadow:0 30px 60px -20px rgba(20,16,40,.45), 0 0 0 1px rgba(20,16,40,.08); }
+  }
+
+  .titlebar { height:52px; flex:none; display:flex; align-items:center; gap:10px; padding:0 14px 0 16px; color:#fff;
+              background:linear-gradient(90deg, var(--navy), var(--navy2) 55%, var(--tb3)); }
+  .crow { cursor:pointer; }
+  .crow.caw { animation:caw .35s ease 2 !important; }
+  @keyframes caw { 30% { transform:translateY(-6px) rotate(-12deg) scale(1.08); } 60% { transform:rotate(6deg); } }
+  .titlebar img { width:36px; height:36px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.3)); animation:float 3s ease-in-out infinite; }
+  @keyframes float { 50% { transform:translateY(-3px) rotate(-5deg); } }
+  .brand { font-size:19px; font-weight:800; letter-spacing:-.3px; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.16); }
+  .titlebar .spacer { flex:1; }
+  .tb-btn { min-width:32px; height:32px; padding:0 8px; border-radius:10px; border:0; cursor:pointer; background:rgba(255,255,255,.12); color:#fff; font-size:15px; }
+  .tb-btn:hover { background:rgba(255,255,255,.22); }
+  .tb-btn.money { font-size:12px; }
+
+  .body { flex:1; display:flex; min-height:0; }
+
+  /* 왼쪽 메뉴 */
+  .side { width:92px; flex:none; background:var(--navy); color:var(--side-text); display:flex; flex-direction:column; align-items:center; padding:14px 0; gap:6px; }
+  .nav { width:72px; padding:10px 0 8px; border:0; border-radius:16px; background:transparent; color:inherit; cursor:pointer; text-align:center; font-size:12px; }
+  .nav .ic { font-size:22px; display:block; margin-bottom:3px; }
+  .nav:hover { background:rgba(255,255,255,.07); }
+  .nav.on { background:linear-gradient(160deg, var(--accent2), var(--accent)); color:var(--on-accent); font-weight:700; box-shadow:0 8px 16px -8px var(--accent); }
+  .side .grow { flex:1; }
+  .mini-conn { width:80px; font-size:10.5px; line-height:1.35; text-align:center; cursor:pointer; }
+  .mini-conn b { display:block; color:#fff; font-size:11px; margin-bottom:2px; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:3px; background:#9a95ab; }
+  .dot.ok { background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.2); }
+  .dot.err { background:#fb7185; box-shadow:0 0 0 3px rgba(251,113,133,.2); }
+
+  .pages { flex:1; min-width:0; display:flex; }
+  .page { flex:1; min-width:0; display:flex; overflow:auto; }
+
+  /* 공통 */
+  h2 { font-size:20px; font-weight:800; margin:0; letter-spacing:-.3px; }
+  h3 { font-size:15px; font-weight:800; margin:0; }
+  .muted { color:var(--muted); }
+  .hint { color:var(--muted); font-size:12.5px; }
+  .card { background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:16px 18px; box-shadow:0 12px 24px -18px rgba(20,16,40,.45); }
+  .field { display:block; font-weight:700; font-size:13px; margin:12px 0 6px; }
+  .input { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:12px; background:var(--soft3); outline:none; }
+  .input:focus { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  textarea.input { resize:vertical; min-height:120px; line-height:1.7; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .between { justify-content:space-between; }
+
+  .btn { height:38px; padding:0 18px; border:0; border-radius:12px; cursor:pointer; font-weight:700; color:var(--on-accent); white-space:nowrap;
+         background:linear-gradient(135deg, var(--accent2), var(--accent));
+         box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 3px 0 var(--edge), 0 8px 14px -8px var(--accent); transition:transform .08s, box-shadow .08s; }
+  .btn:active { transform:translateY(3px); box-shadow:inset 0 2px 4px rgba(0,0,0,.15), 0 0 0 var(--edge); }
+  .btn.dark { color:#fff; background:linear-gradient(135deg, var(--fb1), var(--navy)); box-shadow:inset 0 2px 0 rgba(255,255,255,.2), 0 3px 0 #000, 0 8px 14px -8px var(--navy); }
+  .btn.ghost { color:var(--ink); background:var(--soft); box-shadow:0 2px 0 var(--line); }
+  .btn.danger { color:#fff; background:linear-gradient(135deg, #fb7185, var(--err)); box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 3px 0 #9f1239; }
+  .btn.small { height:30px; padding:0 12px; font-size:12.5px; border-radius:10px; }
+  .btn:disabled { opacity:.55; cursor:default; transform:none; }
+  a.btn { display:inline-flex; align-items:center; text-decoration:none; }
+  .link { border:0; background:none; padding:0; color:var(--accent); cursor:pointer; font-size:12.5px; font-weight:700; }
+  [data-theme="black-gold"] .link { color:var(--edge); }
+
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:999px; font-size:12.5px; cursor:pointer;
+          border:1.5px solid var(--line); background:var(--card); user-select:none; white-space:nowrap; }
+  .chip:hover { border-color:var(--accent2); }
+  .chip.on { color:var(--on-accent); border-color:transparent; background:linear-gradient(135deg, var(--accent2), var(--accent)); box-shadow:0 6px 12px -6px var(--accent); }
+  .chip .n { font-size:11px; opacity:.7; }
+  .chip.dashed { border-style:dashed; color:var(--ink); background:transparent; }
+  .tag { display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:999px; margin:2px 4px 0 0; background:var(--soft); color:var(--ink); white-space:nowrap; }
+  .tag.ok { background:#ecfdf3; color:var(--ok); } .tag.err { background:#fff1f5; color:var(--err); } .tag.wait { background:#fff7e6; color:var(--warn); }
+  .status { min-height:1.4em; font-size:13px; white-space:pre-line; }
+  .status.ok { color:var(--ok); } .status.err { color:var(--err); }
+
+  /* ===== ✉️ 문자 쓰기 ===== */
+  .write { flex:1; min-width:0; display:flex; gap:14px; padding:16px 18px; }
+  .who-col { width:280px; flex:none; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .who-col .card { padding:12px 12px; display:flex; flex-direction:column; gap:8px; min-height:0; }
+  .who-col .pick { flex:1; }
+  .groups { display:flex; flex-wrap:wrap; gap:6px; }
+  .clist { flex:1; min-height:80px; overflow:auto; margin:0 -4px; padding:0 4px; }
+  .crow-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:10px; cursor:pointer; }
+  .crow-item:hover { background:var(--soft3); }
+  .crow-item input { width:16px; height:16px; accent-color:var(--accent); flex:none; }
+  .crow-item .nm { font-weight:700; font-size:13px; }
+  .crow-item .ph { font-size:11.5px; color:var(--muted); }
+  .crow-item.on { background:var(--soft); }
+  .empty { padding:16px 8px; text-align:center; color:var(--muted); font-size:12.5px; }
+  .picked { display:flex; flex-wrap:wrap; gap:5px; max-height:86px; overflow:auto; }
+  .picked .chip { padding:2px 4px 2px 10px; font-size:12px; cursor:default; }
+  .picked .chip button { width:18px; height:18px; border:0; border-radius:50%; background:var(--soft2); color:var(--ink); font-size:10px; cursor:pointer; }
+
+  .compose { flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; }
+  .head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .editor { flex:1; min-height:220px; display:flex; flex-direction:column; overflow:hidden; padding:0; }
+  .editor .subject { border:0; border-bottom:1.5px dashed var(--line); padding:12px 18px 10px; font-size:15px; font-weight:700; outline:none; background:transparent; }
+  .editor textarea { flex:1; border:0; resize:none; outline:none; padding:12px 18px; font-size:15px; line-height:1.75; background:transparent; min-height:90px; }
+  .toolbar { display:flex; align-items:center; gap:6px; padding:9px 10px; border-top:1.5px solid var(--line); background:var(--soft3); position:relative; flex-wrap:wrap; }
+  .tool { white-space:nowrap; height:32px; padding:0 11px; border:0; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-size:12.5px; color:var(--ink); background:var(--soft); cursor:pointer; }
+  .tool:hover { background:var(--soft2); }
+  .toolbar .spacer { flex:1; }
+  .meter { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .meter b { color:var(--text); }
+  .meter .kind { display:inline-block; margin-left:4px; padding:1px 8px; border-radius:999px; background:var(--soft2); color:var(--ink); font-weight:700; }
+  .meter .kind.long { background:color-mix(in srgb, var(--accent) 25%, white); color:var(--text); }
+  .pop { position:absolute; bottom:48px; left:8px; z-index:5; width:min(320px, 90%); max-height:260px; overflow:auto; padding:6px;
+         background:var(--card); border:1.5px solid var(--line); border-radius:14px; box-shadow:0 12px 24px -10px rgba(20,16,40,.35); }
+  .pop button { display:block; width:100%; text-align:left; border:0; background:transparent; border-radius:10px; padding:8px 10px; cursor:pointer; }
+  .pop button:hover { background:var(--soft); }
+  .pop b { display:block; font-size:13px; }
+  .pop span { display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .warn { font-size:12.5px; color:var(--warn); background:#fff7e6; border-radius:10px; padding:6px 10px; }
+  .sendbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .sendbar label { display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
+  .sendbar input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent); }
+  .sendbar .input { width:auto; padding:6px 10px; }
+  .sendbar .spacer { flex:1; }
+  .send { height:46px; padding:0 22px; border:0; border-radius:14px; cursor:pointer; font-weight:800; font-size:15.5px; white-space:nowrap; color:var(--on-accent);
+          background:linear-gradient(135deg, var(--pink), var(--accent));
+          box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 var(--edge), 0 12px 20px -8px var(--accent); transition:transform .08s, box-shadow .08s; }
+  .send:active { transform:translateY(4px); box-shadow:inset 0 2px 4px rgba(0,0,0,.15), 0 0 0 var(--edge); }
+  .send:disabled { opacity:.6; cursor:default; transform:none; }
+
+  /* 오른쪽 휴대폰 미리보기 */
+  .preview { width:250px; flex:none; display:flex; flex-direction:column; gap:10px; align-items:center; }
+  .phone { width:236px; flex:1; max-height:470px; min-height:300px; border-radius:36px; padding:10px; background:linear-gradient(160deg, var(--navy2), var(--navy));
+           box-shadow:0 18px 30px -16px rgba(20,16,40,.6), inset 0 0 0 2px rgba(255,255,255,.08); display:flex; }
+  .screen { flex:1; border-radius:28px; background:var(--screen); display:flex; flex-direction:column; overflow:hidden; }
+  .notch { width:80px; height:18px; border-radius:0 0 12px 12px; background:var(--navy); margin:0 auto; flex:none; }
+  .ph-head { text-align:center; padding:6px 10px 8px; border-bottom:1px solid var(--line); background:var(--card); flex:none; }
+  .ph-head .av { width:30px; height:30px; border-radius:50%; margin:0 auto 2px; display:grid; place-items:center; background:var(--soft2); font-weight:800; font-size:13px; }
+  .ph-head b { display:block; font-size:12.5px; }
+  .ph-head span { font-size:10.5px; color:var(--muted); }
+  .ph-body { flex:1; overflow:auto; padding:12px 10px; display:flex; flex-direction:column; gap:6px; }
+  .ph-type { align-self:center; font-size:10.5px; color:var(--muted); }
+  .msg { align-self:flex-start; max-width:88%; background:var(--card); border-radius:16px 16px 16px 4px; padding:8px 11px; font-size:12.5px; line-height:1.55;
+         white-space:pre-wrap; word-break:break-word; box-shadow:0 2px 6px -3px rgba(0,0,0,.2); }
+  .msg .sub { display:block; font-weight:800; margin-bottom:3px; }
+  .msg.empty-msg { color:var(--muted); font-style:italic; }
+  .ph-nav { display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:var(--muted); }
+  .ph-nav button { width:26px; height:26px; border-radius:50%; border:0; background:var(--soft2); cursor:pointer; color:var(--ink); }
+  .bubble { display:flex; align-items:flex-end; gap:8px; width:100%; }
+  .bubble img { width:56px; height:56px; flex:none; }
+  .bubble div { flex:1; background:var(--card); border:1.5px solid var(--line); border-radius:16px 16px 16px 4px; padding:8px 11px; font-size:12.5px; color:var(--ink);
+                box-shadow:0 8px 16px -12px rgba(20,16,40,.5); }
+
+  /* ===== 다른 화면들 ===== */
+  .stack { flex:1; padding:18px 22px; display:flex; flex-direction:column; gap:14px; max-width:820px; min-width:0; }
+  .table { width:100%; border-collapse:collapse; }
+  .table td { padding:8px 6px; border-top:1.5px dashed var(--line); vertical-align:middle; }
+  .table tr:first-child td { border-top:0; }
+  .table td.ck { width:28px; }
+  .table td.ck input { width:16px; height:16px; accent-color:var(--accent); }
+  .table .nm { font-weight:700; }
+  .table .ph { color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .table td.act { text-align:right; white-space:nowrap; }
+  .icon-btn { width:30px; height:30px; border:0; border-radius:9px; background:var(--soft); cursor:pointer; }
+  .icon-btn:hover { background:var(--soft2); }
+  .tpl { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-top:1.5px dashed var(--line); }
+  .tpl:first-child { border-top:0; }
+  .tpl .txt { flex:1; min-width:0; }
+  .tpl p { margin:4px 0 0; white-space:pre-wrap; word-break:break-word; color:var(--ink); font-size:13px; max-height:66px; overflow:hidden; }
+  .hist { padding:12px 0; border-top:1.5px dashed var(--line); }
+  .hist:first-child { border-top:0; }
+  .hist .when { font-size:12px; color:var(--muted); }
+  .hist .txt { margin:4px 0 6px; white-space:pre-wrap; word-break:break-word; font-size:13px; max-height:60px; overflow:hidden; }
+  .hist details summary { cursor:pointer; font-size:12.5px; color:var(--ink); }
+  .hist .people { margin-top:4px; }
+  .state { font-size:12px; padding:2px 10px; border-radius:999px; background:var(--soft2); color:var(--ink); font-weight:700; }
+  .state.ok { background:#dcfce7; color:var(--ok); } .state.err { background:#ffe4ec; color:var(--err); } .state.wait { background:#fff1d6; color:var(--warn); }
+
+  /* 색상 테마 고르기 */
+  .themes { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px; margin-top:10px; }
+  .theme { border:2px solid var(--line); border-radius:14px; padding:8px; cursor:pointer; background:var(--card); text-align:left; }
+  .theme.on { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .swatch { height:46px; border-radius:10px; display:flex; overflow:hidden; margin-bottom:6px; }
+  .swatch span { flex:1; }
+  .theme b { font-size:12.5px; }
+
+  /* 창 (확인·편집·도움말) */
+  .overlay { position:fixed; inset:0; z-index:20; background:rgba(20,16,40,.45); display:grid; place-items:center; padding:16px; }
+  .overlay > .card { width:min(460px, 100%); max-height:92vh; overflow:auto; }
+  .overlay ol { padding-left:20px; margin:8px 0; }
+  .overlay li { margin:6px 0; }
+  .sum { width:100%; border-collapse:collapse; margin:10px 0; }
+  .sum td { padding:7px 4px; border-top:1px solid var(--line); }
+  .sum td:last-child { text-align:right; font-weight:700; }
+  .sum tr.total td { font-size:16px; color:var(--text); }
+  .sample { background:var(--soft3); border:1.5px solid var(--line); border-radius:12px; padding:8px 12px; white-space:pre-wrap; word-break:break-word; font-size:13px; max-height:120px; overflow:auto; }
+  .big-ok { text-align:center; }
+  .big-ok img { width:110px; }
+
+  .confetti { position:fixed; top:-20px; font-size:24px; pointer-events:none; animation:fall 1.6s ease-in forwards; z-index:30; }
+  @keyframes fall { to { transform:translateY(105vh) rotate(540deg); opacity:.2; } }
+
+  /* 조금 좁은 창: 미리보기 숨김 */
+  @media (max-width:1050px) { .preview { display:none; } }
+  /* 좁은 화면: 메뉴는 아래, 받는 사람 칸은 위로 */
+  @media (max-width:760px) {
+    .body { flex-direction:column-reverse; }
+    .side { width:100%; flex-direction:row; justify-content:space-around; padding:6px; }
+    .side .grow, .mini-conn { display:none; }
+    .nav { width:auto; flex:1; padding:6px 0; }
+    .write { flex-direction:column; padding:12px; }
+    .who-col { width:100%; }
+    .stack { padding:14px; }
+  }
+</style>
+</head>
+<body>
+<div class="window">
+  <header class="titlebar">
+    <img src="/icon.png?v=1.0" alt="" class="crow" title="눌러보세요! 깍깍">
+    <span class="brand">깍깍이</span>
+    <span class="badge">빌드 <span id="build">-</span></span>
+    <span class="spacer"></span>
+    <button class="tb-btn money hidden" id="balanceBtn" type="button" title="솔라피 잔액 (누르면 새로 확인)"></button>
+    <button class="tb-btn" id="soundBtn" type="button" title="소리 켜기/끄기">🔊</button>
+    <button class="tb-btn" id="helpBtn" type="button" title="도움말">❔</button>
+  </header>
+
+  <div class="body">
+    <nav class="side">
+      <button class="nav on" data-page="write" type="button"><span class="ic">✉️</span>문자 쓰기</button>
+      <button class="nav" data-page="contacts" type="button"><span class="ic">📇</span>연락처</button>
+      <button class="nav" data-page="templates" type="button"><span class="ic">📝</span>문구</button>
+      <button class="nav" data-page="history" type="button"><span class="ic">🕘</span>보낸 기록</button>
+      <button class="nav" data-page="settings" type="button"><span class="ic">⚙️</span>설정</button>
+      <div class="grow"></div>
+      <div class="mini-conn" data-go="settings" title="솔라피 연결 상태"><b><span class="dot" id="connDot"></span>솔라피</b><span id="connMini">확인 중</span></div>
+    </nav>
+
+    <main class="pages">
+      <!-- ✉️ 문자 쓰기 -->
+      <section class="page" id="page-write">
+        <div class="write">
+          <div class="who-col">
+            <div class="card">
+              <div class="row between"><h3>받는 사람 <span class="muted" id="pickedCount">0명</span></h3><button class="link hidden" type="button" id="clearPicked">모두 빼기</button></div>
+              <div class="picked" id="picked"><span class="hint">아래에서 골라주세요</span></div>
+            </div>
+            <div class="card pick">
+              <div class="groups" id="groupChips"></div>
+              <input class="input" type="search" id="contactSearch" placeholder="🔍 이름이나 번호로 찾기" autocomplete="off">
+              <div class="clist" id="contactList"></div>
+              <div class="row" style="flex-wrap:nowrap">
+                <input class="input" type="tel" id="extraPhone" placeholder="번호 직접 넣기 (010-...)" autocomplete="off" style="padding:8px 10px">
+                <button class="btn small ghost" type="button" id="extraAdd">추가</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="compose">
+            <div class="head"><h2>누구에게 깍깍 보내볼까요?</h2></div>
+            <div class="hint hidden warn" id="setupHint">⚙️ <b>설정</b>에서 솔라피 열쇠와 내 번호를 넣으면 문자를 보낼 수 있어요. 그전에도 연락처·문구는 미리 만들어 둘 수 있어요!</div>
+            <div class="card editor">
+              <input class="subject hidden" id="subject" placeholder="긴 문자 제목 (선택 · 한글 20자까지)" maxlength="40" autocomplete="off">
+              <textarea id="message" placeholder="보낼 글을 써주세요&#10;&#10;예) {이름}님 안녕하세요! 이번 주 토요일 모임 잊지 마세요."></textarea>
+              <div class="toolbar">
+                <button class="tool" type="button" id="nameBtn" title="받는 사람 이름이 들어갈 자리">👤 이름 넣기</button>
+                <button class="tool" type="button" id="tplBtn" title="자주 쓰는 문구 불러오기">📝 문구 불러오기</button>
+                <button class="tool" type="button" id="tplSaveBtn" title="지금 글을 자주 쓰는 문구로 저장">💾 문구로 저장</button>
+                <div class="pop hidden" id="tplPop"></div>
+                <span class="spacer"></span>
+                <span class="meter" id="meter"></span>
+              </div>
+            </div>
+            <div class="warn hidden" id="emojiWarn">⚠️ 이모지(😊 같은 그림 글자)는 받는 휴대폰에서 <b>?</b> 나 네모로 깨져 보일 수 있어요.</div>
+            <div class="sendbar">
+              <label><input type="checkbox" id="scheduleOn"> ⏰ 예약해서 보내기</label>
+              <input type="datetime-local" class="input hidden" id="scheduleAt">
+              <span class="spacer"></span>
+              <button class="send" type="button" id="sendBtn">🐦‍⬛ 깍깍! 보내기</button>
+            </div>
+            <div class="hint hidden" id="scheduleHint">예약해 두면 그 시각에 솔라피가 대신 보내줘요. <b>그때 컴퓨터가 꺼져 있어도 괜찮아요.</b></div>
+          </div>
+
+          <aside class="preview">
+            <div class="phone">
+              <div class="screen">
+                <div class="notch"></div>
+                <div class="ph-head"><div class="av" id="pvAv">?</div><b id="pvName">받는 사람</b><span id="pvPhone">이렇게 받아요</span></div>
+                <div class="ph-body"><span class="ph-type" id="pvType">문자 메시지</span><div class="msg empty-msg" id="pvMsg">글을 쓰면 여기서 보여드려요</div></div>
+              </div>
+            </div>
+            <div class="ph-nav hidden" id="pvNav"><button type="button" id="pvPrev">◀</button><span id="pvIdx">1 / 1</span><button type="button" id="pvNext">▶</button></div>
+            <div class="bubble"><img src="/icon.png?v=1.0" alt="" class="crow" title="눌러보세요! 깍깍"><div id="crowSays">받는 사람을 고르고 글을 쓰면, 제가 콕콕 보내드릴게요! 깍깍~</div></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 📇 연락처 -->
+      <section class="page hidden" id="page-contacts">
+        <div class="stack">
+          <div class="row between"><h2>연락처 <span class="muted" id="contactTotal"></span></h2>
+            <div class="row"><button class="btn ghost" type="button" id="importBtn">📥 구글 연락처 가져오기</button><button class="btn" type="button" id="addContactBtn">＋ 새 연락처</button></div></div>
+          <div class="card">
+            <div class="row between">
+              <div class="groups" id="cGroupChips"></div>
+              <div class="row hidden" id="groupTools"><button class="btn small ghost" type="button" id="renameGroup">✏️ 그룹 이름 바꾸기</button><button class="btn small ghost" type="button" id="deleteGroup">🗑 그룹 지우기</button></div>
+            </div>
+            <input class="input" type="search" id="cSearch" placeholder="🔍 이름이나 번호로 찾기" style="margin-top:10px" autocomplete="off">
+            <div class="row between" style="margin-top:10px">
+              <label class="row hint" style="gap:6px; cursor:pointer"><input type="checkbox" id="cAll" style="accent-color:var(--accent)"> 보이는 사람 모두 고르기</label>
+              <div class="row hidden" id="bulkTools"><button class="btn small" type="button" id="bulkWrite">✉️ 고른 사람에게 문자 쓰기</button><button class="btn small ghost" type="button" id="bulkDelete">🗑 고른 사람 지우기</button></div>
+            </div>
+            <table class="table" style="margin-top:6px"><tbody id="cTable"></tbody></table>
+            <div class="empty hidden" id="cEmpty"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📝 문구 -->
+      <section class="page hidden" id="page-templates">
+        <div class="stack">
+          <div class="row between"><h2>자주 쓰는 문구</h2><button class="btn" type="button" id="addTplBtn">＋ 새 문구</button></div>
+          <div class="hint">모임 안내처럼 자주 보내는 글을 저장해 두세요. <b>{이름}</b> 을 넣으면 받는 사람 이름으로 바뀌어요.</div>
+          <div class="card" id="tplList"></div>
+        </div>
+      </section>
+
+      <!-- 🕘 보낸 기록 -->
+      <section class="page hidden" id="page-history">
+        <div class="stack">
+          <div class="row between"><h2>보낸 기록</h2><button class="btn small ghost" type="button" id="clearHistory">기록 모두 지우기</button></div>
+          <div class="hint">받았는지는 솔라피에 물어봐서 알려드려요. 보통 몇 초~몇 분 걸려요. [🔄 받았는지 확인]을 눌러보세요.</div>
+          <div class="card" id="histList"></div>
+        </div>
+      </section>
+
+      <!-- ⚙️ 설정 -->
+      <section class="page hidden" id="page-settings">
+        <div class="stack">
+          <h2>설정</h2>
+          <div class="card">
+            <div class="row between"><h3>🔑 솔라피 연결</h3><span class="state" id="connState">확인 중…</span></div>
+            <div class="hint" style="margin-top:4px">솔라피 홈페이지에서 만든 <b>API 키</b>와 <b>API 시크릿</b>을 붙여넣으세요. 이 열쇠는 <b>이 컴퓨터 안(data 폴더)에만</b> 저장돼요.</div>
+            <label class="field" for="sKey">API 키 (API Key)</label>
+            <input class="input" type="text" id="sKey" autocomplete="off" spellcheck="false">
+            <label class="field" for="sSecret">API 시크릿 (API Secret)</label>
+            <input class="input" type="password" id="sSecret" autocomplete="off">
+            <label class="field" for="sSender">보내는 번호 (내 휴대폰 번호)</label>
+            <input class="input" type="tel" id="sSender" placeholder="010-1234-5678" autocomplete="off">
+            <div class="hint" style="margin-top:4px">이 번호는 솔라피의 <b>발신번호 관리</b>에 먼저 등록(본인 인증)해야 해요. 받는 사람에게는 이 번호로 문자가 가요.</div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn" type="button" id="saveKeys">저장</button>
+              <button class="btn ghost" type="button" id="checkConn">연결 확인</button>
+              <span class="status" id="keysStatus"></span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🧪 시험 문자</h3>
+            <div class="hint" style="margin-top:4px">처음에는 <b>내 휴대폰으로</b> 시험 문자를 보내서 잘 오는지 확인해 보세요. (짧은 문자 1통 요금이 들어요)</div>
+            <div class="row" style="margin-top:10px"><button class="btn dark" type="button" id="testSend">📱 내 번호로 시험 문자 보내기</button><span class="status" id="testStatus"></span></div>
+          </div>
+          <div class="card">
+            <h3>💰 예상 요금 (1통당)</h3>
+            <div class="hint" style="margin-top:4px">보내기 전에 보여주는 예상 비용이에요. 솔라피 요금표를 보고 맞춰 주세요.</div>
+            <div class="row" style="margin-top:10px">
+              <label class="row" style="gap:6px">짧은 문자 <input class="input" type="number" id="pSms" min="0" max="1000" step="0.1" style="width:90px"> 원</label>
+              <label class="row" style="gap:6px; margin-left:14px">긴 문자 <input class="input" type="number" id="pLms" min="0" max="1000" step="0.1" style="width:90px"> 원</label>
+              <button class="btn small" type="button" id="savePrices" style="margin-left:8px">저장</button>
+              <span class="status" id="pricesStatus"></span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🎨 색상 테마</h3>
+            <div class="themes" id="themes"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- 보내기 전 확인 창 -->
+<div class="overlay hidden" id="confirmCard">
+  <div class="card">
+    <h3 id="cfTitle">이렇게 보낼까요?</h3>
+    <table class="sum"><tbody id="cfSum"></tbody></table>
+    <div class="hint" id="cfSampleWho">첫 번째 사람이 받을 문자:</div>
+    <div class="sample" id="cfSample"></div>
+    <div class="status err" id="cfProblems" style="margin-top:8px"></div>
+    <div class="hint" style="margin-top:6px">예상 비용은 설정의 요금으로 계산한 대략의 금액이에요.</div>
+    <div class="row" style="margin-top:14px; justify-content:flex-end">
+      <button class="btn ghost" type="button" data-close>취소</button>
+      <button class="btn" type="button" id="cfGo">🐦‍⬛ 깍깍! 보내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 보낸 뒤 결과 창 -->
+<div class="overlay hidden" id="doneCard">
+  <div class="card big-ok">
+    <img src="/icon.png?v=1.0" alt="" class="crow">
+    <h3 id="doneTitle"></h3>
+    <div class="status" id="doneText" style="margin-top:6px"></div>
+    <div class="row" style="margin-top:14px; justify-content:center">
+      <button class="btn ghost" type="button" data-close data-go="history">🕘 보낸 기록 보기</button>
+      <button class="btn" type="button" data-close>좋아요</button>
+    </div>
+  </div>
+</div>
+
+<!-- 연락처 추가·고치기 창 -->
+<div class="overlay hidden" id="contactCard">
+  <div class="card">
+    <h3 id="ccTitle">새 연락처</h3>
+    <label class="field" for="ccName">이름</label>
+    <input class="input" type="text" id="ccName" autocomplete="off" maxlength="50">
+    <label class="field" for="ccPhone">휴대폰 번호</label>
+    <input class="input" type="tel" id="ccPhone" placeholder="010-1234-5678" autocomplete="off">
+    <label class="field" for="ccGroupNew">그룹 <span class="hint" style="font-weight:400">(눌러서 넣고 빼요)</span></label>
+    <div class="groups" id="ccGroups"></div>
+    <div class="row" style="margin-top:8px; flex-wrap:nowrap"><input class="input" type="text" id="ccGroupNew" placeholder="새 그룹 이름 (예: 가족)" style="padding:8px 10px"><button class="btn small ghost" type="button" id="ccGroupAdd">＋ 그룹</button></div>
+    <div class="status err" id="ccStatus" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:10px; justify-content:flex-end">
+      <button class="btn ghost" type="button" data-close>취소</button>
+      <button class="btn" type="button" id="ccSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 구글 연락처 가져오기 창 -->
+<div class="overlay hidden" id="importCard">
+  <div class="card">
+    <h3>📥 구글 연락처 가져오기</h3>
+    <ol>
+      <li><a href="https://contacts.google.com" target="_blank" rel="noopener">구글 연락처(contacts.google.com)</a>를 열어요.</li>
+      <li>연락처 목록 위쪽의 <b>내보내기</b> 버튼(⤓ 모양)을 눌러요.<br><span class="hint">라벨(가족 등)만 고르면 그 사람들만 내보낼 수 있어요.</span></li>
+      <li><b>Google CSV</b> 를 고르고 <b>내보내기</b>를 눌러요. <span class="hint">→ 다운로드 폴더에 contacts.csv 가 생겨요.</span></li>
+      <li>아래 <b>[파일 고르기]</b>를 눌러 그 파일을 골라요.</li>
+    </ol>
+    <div class="hint">· 구글의 <b>라벨</b>은 깍깍이의 <b>그룹</b>이 돼요. · 휴대폰 번호가 없는 사람은 건너뛰어요. · 이미 있는 번호는 다시 넣지 않아요.</div>
+    <input type="file" id="importFile" accept=".csv,.vcf,text/csv,text/vcard" class="hidden">
+    <div class="status" id="importStatus" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:10px; justify-content:flex-end">
+      <button class="btn ghost" type="button" data-close>닫기</button>
+      <button class="btn" type="button" id="importPick">📂 파일 고르기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 문구 추가·고치기 창 -->
+<div class="overlay hidden" id="tplCard">
+  <div class="card">
+    <h3 id="tcTitle">새 문구</h3>
+    <label class="field" for="tcName">문구 이름</label>
+    <input class="input" type="text" id="tcName" maxlength="40" placeholder="예: 모임 안내" autocomplete="off">
+    <label class="field" for="tcText">내용 <button class="link" type="button" id="tcNameTag" style="margin-left:6px">👤 이름 넣기</button></label>
+    <textarea class="input" id="tcText" rows="7" placeholder="{이름}님 안녕하세요! ..."></textarea>
+    <div class="hint" id="tcMeter"></div>
+    <div class="status err" id="tcStatus"></div>
+    <div class="row" style="margin-top:10px; justify-content:flex-end">
+      <button class="btn ghost" type="button" data-close>취소</button>
+      <button class="btn" type="button" id="tcSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="helpCard">
+  <div class="card">
+    <h3>🐦‍⬛ 깍깍이 쓰는 법</h3>
+    <ol>
+      <li><b>⚙️ 설정</b>에 솔라피 API 키·시크릿과 <b>내 휴대폰 번호</b>를 넣어요. (처음 한 번)</li>
+      <li><b>📇 연락처</b>에서 [구글 연락처 가져오기]로 연락처를 한 번에 넣어요.</li>
+      <li><b>✉️ 문자 쓰기</b>에서 받는 사람을 고르고(그룹을 누르면 한꺼번에), 글을 써요.</li>
+      <li><b>👤 이름 넣기</b>를 누르면 <b>{이름}</b> 자리에 사람마다 이름이 들어가요.</li>
+      <li><b>깍깍! 보내기</b>를 누르면 몇 명·얼마인지 먼저 보여드려요. 확인하고 보내요.</li>
+      <li>⏰ 예약해 두면 그 시각에 솔라피가 대신 보내요. 컴퓨터를 꺼도 돼요.</li>
+      <li>한글 45자(90바이트)가 넘으면 <b>긴 문자</b>가 되고 요금이 조금 더 들어요.</li>
+    </ol>
+    <div class="hint">이 창(검은 창 포함)을 닫으면 깍깍이도 꺼져요. 예약한 문자는 그래도 보내져요.</div>
+    <div class="row" style="margin-top:12px; justify-content:flex-end"><button class="btn" type="button" data-close>알겠어요</button></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NAME_TAG = '{이름}';
+const SMS_MAX = 90;
+const LMS_MAX = 2000;
+const THEMES = [
+  { id: 'black-gold', name: '까마귀 블랙 & 골드', colors: ['#1c1b22', '#e0a91f', '#ffd166', '#f7f6f2'] },
+  { id: 'purple', name: '보라·남색', colors: ['#2a2350', '#7c5cf0', '#ff8fc2', '#f6f3ff'] },
+  { id: 'mint', name: '민트 숲', colors: ['#0f3b3a', '#0d9488', '#6ee7b7', '#f1fbf8'] },
+  { id: 'coral', name: '코랄 크림', colors: ['#4a2c2a', '#ff7a59', '#ffc27a', '#fff8f3'] },
+  { id: 'sky', name: '하늘 블루', colors: ['#13294b', '#3b82f6', '#67e8f9', '#f3f8ff'] },
+];
+
+let settings = { prices: { SMS: 20, LMS: 50 }, configured: false };
+let contacts = [];
+let templates = [];
+let history = [];
+const picked = new Set(); // 고른 연락처 id
+let extras = []; // 직접 넣은 번호 [{ phone, name }]
+let pickGroup = ''; // 문자 쓰기 화면에서 보고 있는 그룹
+let cGroup = ''; // 연락처 화면에서 보고 있는 그룹
+const cChecked = new Set();
+let pvIndex = 0;
+
+// ---- 작은 도구들 ----
+function el(tag, props = {}, ...children) {
+  const node = Object.assign(document.createElement(tag), props);
+  node.append(...children.filter((c) => c !== null && c !== undefined && c !== false));
+  return node;
+}
+function byteLength(text) { let n = 0; for (const ch of String(text || '')) n += ch.codePointAt(0) <= 0x7f ? 1 : 2; return n; }
+function personalize(text, who) { return String(text || '').split(NAME_TAG).join((who?.name || '').trim()); }
+function digits(v) { let d = String(v || '').replace(/\D/g, ''); if (d.startsWith('82') && d.length >= 11) d = '0' + d.slice(2); return d; }
+function isMobile(v) { return /^01[016789]\d{7,8}$/.test(digits(v)); }
+function fmtPhone(v) { const p = digits(v); return /^01\d{9}$/.test(p) ? `${p.slice(0, 3)}-${p.slice(3, 7)}-${p.slice(7)}` : /^01\d{8}$/.test(p) ? `${p.slice(0, 3)}-${p.slice(3, 6)}-${p.slice(6)}` : p; }
+function won(n) { return `${Math.round(n * 10) / 10}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'; }
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' });
+}
+function setStatus(node, text, kind = '') { node.textContent = text; node.className = 'status ' + kind; }
+function openCard(id) { $(id).classList.remove('hidden'); }
+function closeCards() { document.querySelectorAll('.overlay').forEach((o) => o.classList.add('hidden')); }
+document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeCards));
+document.querySelectorAll('.overlay').forEach((o) => o.addEventListener('click', (e) => { if (e.target === o) closeCards(); }));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCards(); });
+
+async function api(path, { method = 'GET', body } = {}) {
+  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `요청 실패 (${res.status})`);
+  return data;
+}
+
+// ---- "깍깍!" 소리 (켜고 끈 것은 기억) ----
+let soundOn = true;
+try { soundOn = localStorage.getItem('kkakkaki-sound') !== 'off'; } catch {}
+const kkakSound = new Audio('/kkak.wav');
+function kkak(force) {
+  document.querySelectorAll('.crow').forEach((c) => { c.classList.remove('caw'); void c.offsetWidth; c.classList.add('caw'); });
+  if (!soundOn && !force) return;
+  kkakSound.currentTime = 0;
+  kkakSound.play().catch(() => {});
+}
+function showSound() { $('soundBtn').textContent = soundOn ? '🔊' : '🔇'; $('soundBtn').title = soundOn ? '소리 끄기' : '소리 켜기'; }
+$('soundBtn').addEventListener('click', () => {
+  soundOn = !soundOn;
+  try { localStorage.setItem('kkakkaki-sound', soundOn ? 'on' : 'off'); } catch {}
+  showSound();
+  if (soundOn) kkak();
+});
+document.querySelectorAll('.crow').forEach((c) => c.addEventListener('click', () => kkak(true)));
+showSound();
+
+function celebrate() {
+  for (let i = 0; i < 18; i++) {
+    const c = el('div', { className: 'confetti', textContent: ['✉️', '💬', '✨', '🪶', '💛'][i % 5] });
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDelay = Math.random() * 0.4 + 's';
+    document.body.append(c);
+    setTimeout(() => c.remove(), 2200);
+  }
+}
+
+// ---- 화면 바꾸기 (왼쪽 메뉴) ----
+function go(page) {
+  document.querySelectorAll('.page').forEach((p) => p.classList.toggle('hidden', p.id !== `page-${page}`));
+  document.querySelectorAll('.nav').forEach((n) => n.classList.toggle('on', n.dataset.page === page));
+  if (page === 'history') loadHistory(true);
+  if (page === 'contacts') renderContactsPage();
+}
+document.querySelectorAll('[data-page]').forEach((b) => b.addEventListener('click', () => go(b.dataset.page)));
+document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+$('helpBtn').addEventListener('click', () => openCard('helpCard'));
+
+// ---- 색상 테마 ----
+function setTheme(id) {
+  document.documentElement.dataset.theme = id;
+  try { localStorage.setItem('kkakkaki-theme', id); } catch {}
+  document.querySelectorAll('.theme').forEach((t) => t.classList.toggle('on', t.dataset.id === id));
+}
+for (const t of THEMES) {
+  const card = el('button', { type: 'button', className: 'theme' }, el('div', { className: 'swatch' }, ...t.colors.map((c) => { const s = el('span'); s.style.background = c; return s; })), el('b', { textContent: t.name }));
+  card.dataset.id = t.id;
+  card.onclick = () => setTheme(t.id);
+  $('themes').append(card);
+}
+setTheme(document.documentElement.dataset.theme || 'black-gold');
+
+// ===================== 설정 · 연결 상태 =====================
+function showSettings() {
+  $('sKey').value = settings.apiKey || '';
+  $('sSecret').value = '';
+  $('sSecret').placeholder = settings.hasSecret ? '저장되어 있어요 (바꿀 때만 넣으세요)' : '';
+  $('sSender').value = settings.sender ? fmtPhone(settings.sender) : '';
+  $('pSms').value = settings.prices.SMS;
+  $('pLms').value = settings.prices.LMS;
+  const ok = settings.configured;
+  $('connState').textContent = ok ? '열쇠 있음' : '아직 설정 안 됨';
+  $('connState').className = 'state ' + (ok ? 'ok' : 'wait');
+  $('connDot').className = 'dot ' + (ok ? 'ok' : 'err');
+  $('connMini').textContent = ok ? fmtPhone(settings.sender) : '설정 필요';
+  $('setupHint').classList.toggle('hidden', ok);
+}
+
+async function checkBalance(quiet) {
+  try {
+    const b = await api('/api/solapi/check', { method: 'POST' });
+    $('balanceBtn').textContent = `💰 ${won(b.balance + b.point)}`;
+    $('balanceBtn').classList.remove('hidden');
+    $('connState').textContent = '연결됨';
+    $('connState').className = 'state ok';
+    return b;
+  } catch (err) {
+    if (!quiet) throw err;
+    return null;
+  }
+}
+$('balanceBtn').addEventListener('click', () => checkBalance(true));
+
+$('saveKeys').addEventListener('click', async () => {
+  const st = $('keysStatus');
+  setStatus(st, '저장 중…');
+  try {
+    settings = await api('/api/settings', { method: 'POST', body: { apiKey: $('sKey').value, apiSecret: $('sSecret').value, sender: $('sSender').value } });
+    showSettings();
+    if (settings.apiKey && settings.hasSecret) {
+      setStatus(st, '저장했어요. 솔라피에 연결해 보는 중…');
+      const b = await checkBalance(false);
+      setStatus(st, `저장하고 연결까지 확인했어요! 잔액 ${won(b.balance + b.point)}`, 'ok');
+      kkak();
+    } else setStatus(st, '저장했어요.', 'ok');
+  } catch (err) {
+    setStatus(st, err.message, 'err');
+  }
+});
+$('checkConn').addEventListener('click', async () => {
+  const st = $('keysStatus');
+  setStatus(st, '솔라피에 연결해 보는 중…');
+  try {
+    const b = await checkBalance(false);
+    setStatus(st, `연결 잘 돼요! 잔액 ${won(b.balance)}${b.point ? ` + 포인트 ${won(b.point)}` : ''}`, 'ok');
+  } catch (err) {
+    setStatus(st, err.message, 'err');
+    $('connState').textContent = '연결 실패';
+    $('connState').className = 'state err';
+  }
+});
+$('savePrices').addEventListener('click', async () => {
+  try {
+    settings = await api('/api/settings', { method: 'POST', body: { prices: { SMS: $('pSms').value, LMS: $('pLms').value } } });
+    showSettings();
+    updateCompose();
+    setStatus($('pricesStatus'), '저장했어요.', 'ok');
+  } catch (err) {
+    setStatus($('pricesStatus'), err.message, 'err');
+  }
+});
+$('testSend').addEventListener('click', async () => {
+  const st = $('testStatus');
+  if (!settings.sender) return setStatus(st, '먼저 위에 보내는 번호(내 휴대폰 번호)를 넣고 저장해 주세요.', 'err');
+  if (!confirm(`${fmtPhone(settings.sender)} (내 번호)로 시험 문자를 보낼까요? 짧은 문자 1통 요금이 들어요.`)) return;
+  setStatus(st, '보내는 중…');
+  try {
+    const { entry } = await api('/api/send', { method: 'POST', body: { text: '[깍깍이] 시험 문자예요. 잘 받으셨나요? 깍깍!', extra: [{ phone: settings.sender, name: '나' }] } });
+    if (entry.state === 'failed') throw new Error(entry.recipients[0]?.note || '보내지 못했어요.');
+    setStatus(st, '보냈어요! 휴대폰을 확인해 보세요. 📱', 'ok');
+    kkak();
+    checkBalance(true);
+  } catch (err) {
+    setStatus(st, err.message, 'err');
+  }
+});
+
+// ===================== 연락처 · 그룹 =====================
+function allGroups() {
+  const count = new Map();
+  for (const c of contacts) for (const g of c.groups) count.set(g, (count.get(g) || 0) + 1);
+  return [...count].sort((a, b) => a[0].localeCompare(b[0], 'ko'));
+}
+function matches(c, q) {
+  if (!q) return true;
+  const d = digits(q);
+  return c.name.toLowerCase().includes(q.toLowerCase()) || (d.length >= 3 && c.phone.includes(d));
+}
+function sortByName(list) { return [...list].sort((a, b) => a.name.localeCompare(b.name, 'ko')); }
+
+async function loadContacts() {
+  ({ contacts } = await api('/api/contacts'));
+  for (const id of [...picked]) if (!contacts.some((c) => c.id === id)) picked.delete(id);
+  renderPick();
+  renderContactsPage();
+}
+
+// ---- 문자 쓰기: 받는 사람 고르기 ----
+function renderPick() {
+  // 그룹 알약: 누르면 그 그룹만 보이고, 한 번 더 누르면 그룹 전체를 고르거나 빼요
+  const box = $('groupChips');
+  box.innerHTML = '';
+  const groups = allGroups();
+  const allChip = el('span', { className: 'chip' + (pickGroup ? '' : ' on'), textContent: '전체' });
+  allChip.onclick = () => { pickGroup = ''; renderPick(); };
+  box.append(allChip);
+  for (const [g, n] of groups) {
+    const members = contacts.filter((c) => c.groups.includes(g));
+    const allIn = members.length && members.every((c) => picked.has(c.id));
+    const chip = el('span', { className: 'chip' + (pickGroup === g ? ' on' : ''), title: pickGroup === g ? '한 번 더 누르면 그룹 전체를 고르거나 빼요' : `${g} 보기` }, (allIn ? '✓ ' : '') + g, el('span', { className: 'n', textContent: n }));
+    chip.onclick = () => {
+      if (pickGroup !== g) { pickGroup = g; renderPick(); return; }
+      for (const c of members) allIn ? picked.delete(c.id) : picked.add(c.id);
+      renderPick();
+    };
+    box.append(chip);
+  }
+  if (pickGroup && !groups.some(([g]) => g === pickGroup)) pickGroup = '';
+
+  const list = $('contactList');
+  list.innerHTML = '';
+  const q = $('contactSearch').value.trim();
+  const shown = sortByName(contacts.filter((c) => (!pickGroup || c.groups.includes(pickGroup)) && matches(c, q)));
+  if (pickGroup && shown.length) {
+    const members = shown;
+    const allIn = members.every((c) => picked.has(c.id));
+    const btn = el('button', { type: 'button', className: 'link', textContent: allIn ? `「${pickGroup}」 모두 빼기` : `「${pickGroup}」 ${members.length}명 모두 고르기`, style: 'margin:2px 8px 6px' });
+    btn.onclick = () => { for (const c of members) allIn ? picked.delete(c.id) : picked.add(c.id); renderPick(); };
+    list.append(btn);
+  }
+  for (const c of shown) {
+    const input = el('input', { type: 'checkbox', checked: picked.has(c.id) });
+    const row = el('label', { className: 'crow-item' + (picked.has(c.id) ? ' on' : '') }, input, el('div', {}, el('div', { className: 'nm', textContent: c.name }), el('div', { className: 'ph', textContent: fmtPhone(c.phone) + (c.groups.length ? ' · ' + c.groups.join(', ') : '') })));
+    input.onchange = () => { input.checked ? picked.add(c.id) : picked.delete(c.id); renderPick(); };
+    list.append(row);
+  }
+  if (!contacts.length) {
+    const go2 = el('button', { type: 'button', className: 'link', textContent: '📇 연락처 넣으러 가기' });
+    go2.onclick = () => go('contacts');
+    list.append(el('div', { className: 'empty' }, '아직 연락처가 없어요.', el('br'), go2));
+  } else if (!shown.length) list.append(el('div', { className: 'empty', textContent: '찾는 사람이 없어요.' }));
+  renderPicked();
+}
+
+function recipients() {
+  const people = sortByName(contacts.filter((c) => picked.has(c.id)));
+  return [...people, ...extras.map((e) => ({ id: null, name: e.name, phone: e.phone }))];
+}
+
+function renderPicked() {
+  const box = $('picked');
+  box.innerHTML = '';
+  const list = recipients();
+  for (const r of list) {
+    const x = el('button', { type: 'button', title: '빼기', textContent: '✕' });
+    x.onclick = () => { r.id ? picked.delete(r.id) : (extras = extras.filter((e) => e.phone !== r.phone)); renderPick(); };
+    box.append(el('span', { className: 'chip', title: fmtPhone(r.phone) }, r.name || fmtPhone(r.phone), x));
+  }
+  if (!list.length) box.append(el('span', { className: 'hint', textContent: '아래에서 골라주세요' }));
+  $('pickedCount').textContent = `${list.length}명`;
+  $('clearPicked').classList.toggle('hidden', !list.length);
+  updateCompose();
+}
+$('contactSearch').addEventListener('input', renderPick);
+$('clearPicked').addEventListener('click', () => { picked.clear(); extras = []; renderPick(); });
+function addExtra() {
+  const phone = digits($('extraPhone').value);
+  if (!isMobile(phone)) { alert('휴대폰 번호를 확인해 주세요. (예: 010-1234-5678)'); return; }
+  const known = contacts.find((c) => c.phone === phone);
+  if (known) picked.add(known.id);
+  else if (!extras.some((e) => e.phone === phone)) extras.push({ phone, name: '' });
+  $('extraPhone').value = '';
+  renderPick();
+}
+$('extraAdd').addEventListener('click', addExtra);
+$('extraPhone').addEventListener('keydown', (e) => { if (e.key === 'Enter') addExtra(); });
+
+// ---- 연락처 화면 ----
+function renderContactsPage() {
+  $('contactTotal').textContent = contacts.length ? `${contacts.length}명` : '';
+  const box = $('cGroupChips');
+  box.innerHTML = '';
+  const groups = allGroups();
+  if (cGroup && !groups.some(([g]) => g === cGroup)) cGroup = '';
+  const all = el('span', { className: 'chip' + (cGroup ? '' : ' on') }, '전체', el('span', { className: 'n', textContent: contacts.length }));
+  all.onclick = () => { cGroup = ''; renderContactsPage(); };
+  box.append(all);
+  for (const [g, n] of groups) {
+    const chip = el('span', { className: 'chip' + (cGroup === g ? ' on' : '') }, g, el('span', { className: 'n', textContent: n }));
+    chip.onclick = () => { cGroup = g; renderContactsPage(); };
+    box.append(chip);
+  }
+  $('groupTools').classList.toggle('hidden', !cGroup);
+
+  const q = $('cSearch').value.trim();
+  const shown = sortByName(contacts.filter((c) => (!cGroup || c.groups.includes(cGroup)) && matches(c, q)));
+  for (const id of [...cChecked]) if (!contacts.some((c) => c.id === id)) cChecked.delete(id);
+  const tb = $('cTable');
+  tb.innerHTML = '';
+  for (const c of shown) {
+    const ck = el('input', { type: 'checkbox', checked: cChecked.has(c.id) });
+    ck.onchange = () => { ck.checked ? cChecked.add(c.id) : cChecked.delete(c.id); updateBulk(); };
+    const edit = el('button', { type: 'button', className: 'icon-btn', title: '고치기', textContent: '✏️' });
+    edit.onclick = () => openContact(c);
+    const write = el('button', { type: 'button', className: 'icon-btn', title: '이 사람에게 문자 쓰기', textContent: '✉️' });
+    write.onclick = () => { picked.add(c.id); renderPick(); go('write'); $('message').focus(); };
+    tb.append(el('tr', {},
+      el('td', { className: 'ck' }, ck),
+      el('td', { className: 'nm', textContent: c.name }),
+      el('td', { className: 'ph', textContent: fmtPhone(c.phone) }),
+      el('td', {}, ...c.groups.map((g) => el('span', { className: 'tag', textContent: g }))),
+      el('td', { className: 'act' }, write, ' ', edit)));
+  }
+  $('cEmpty').classList.toggle('hidden', shown.length > 0);
+  $('cEmpty').textContent = contacts.length ? '찾는 사람이 없어요.' : '아직 연락처가 없어요. [📥 구글 연락처 가져오기]로 한 번에 넣어보세요!';
+  $('cAll').checked = shown.length > 0 && shown.every((c) => cChecked.has(c.id));
+  $('cAll').onchange = () => { for (const c of shown) $('cAll').checked ? cChecked.add(c.id) : cChecked.delete(c.id); renderContactsPage(); };
+  updateBulk();
+}
+function updateBulk() {
+  $('bulkTools').classList.toggle('hidden', !cChecked.size);
+  $('bulkWrite').textContent = `✉️ 고른 ${cChecked.size}명에게 문자 쓰기`;
+  $('bulkDelete').textContent = `🗑 ${cChecked.size}명 지우기`;
+}
+$('cSearch').addEventListener('input', renderContactsPage);
+$('bulkWrite').addEventListener('click', () => { for (const id of cChecked) picked.add(id); cChecked.clear(); renderPick(); go('write'); });
+$('bulkDelete').addEventListener('click', async () => {
+  if (!confirm(`고른 ${cChecked.size}명을 연락처에서 지울까요?`)) return;
+  ({ contacts } = await api('/api/contacts/delete', { method: 'POST', body: { ids: [...cChecked] } }));
+  cChecked.clear();
+  loadContacts();
+});
+$('renameGroup').addEventListener('click', async () => {
+  const to = prompt(`「${cGroup}」 그룹의 새 이름을 넣어주세요.`, cGroup);
+  if (!to || to.trim() === cGroup) return;
+  try {
+    await api('/api/groups/rename', { method: 'POST', body: { from: cGroup, to } });
+    if (pickGroup === cGroup) pickGroup = to.trim();
+    cGroup = to.trim();
+    loadContacts();
+  } catch (err) { alert(err.message); }
+});
+$('deleteGroup').addEventListener('click', async () => {
+  if (!confirm(`「${cGroup}」 그룹을 지울까요? (사람들은 연락처에 그대로 남아요)`)) return;
+  await api('/api/groups/delete', { method: 'POST', body: { name: cGroup } });
+  cGroup = '';
+  loadContacts();
+});
+
+// 연락처 추가·고치기 창
+let editing = null;
+let editGroups = [];
+function renderEditGroups() {
+  const box = $('ccGroups');
+  box.innerHTML = '';
+  const names = [...new Set([...allGroups().map(([g]) => g), ...editGroups])];
+  for (const g of names) {
+    const chip = el('span', { className: 'chip' + (editGroups.includes(g) ? ' on' : ''), textContent: g });
+    chip.onclick = () => { editGroups = editGroups.includes(g) ? editGroups.filter((x) => x !== g) : [...editGroups, g]; renderEditGroups(); };
+    box.append(chip);
+  }
+  if (!names.length) box.append(el('span', { className: 'hint', textContent: '아직 그룹이 없어요. 아래에서 만들어 보세요.' }));
+}
+function openContact(c) {
+  editing = c || null;
+  editGroups = c ? [...c.groups] : (cGroup ? [cGroup] : []);
+  $('ccTitle').textContent = c ? '연락처 고치기' : '새 연락처';
+  $('ccName').value = c?.name || '';
+  $('ccPhone').value = c ? fmtPhone(c.phone) : '';
+  $('ccGroupNew').value = '';
+  setStatus($('ccStatus'), '', 'err');
+  renderEditGroups();
+  openCard('contactCard');
+  $('ccName').focus();
+}
+function addEditGroup() {
+  const g = $('ccGroupNew').value.trim();
+  if (g && !editGroups.includes(g)) editGroups.push(g);
+  $('ccGroupNew').value = '';
+  renderEditGroups();
+}
+$('addContactBtn').addEventListener('click', () => openContact(null));
+$('ccGroupAdd').addEventListener('click', addEditGroup);
+$('ccGroupNew').addEventListener('keydown', (e) => { if (e.key === 'Enter') addEditGroup(); });
+$('ccSave').addEventListener('click', async () => {
+  if ($('ccGroupNew').value.trim()) addEditGroup();
+  const body = { name: $('ccName').value, phone: $('ccPhone').value, groups: editGroups };
+  try {
+    await api(editing ? `/api/contacts/${editing.id}` : '/api/contacts', { method: editing ? 'PUT' : 'POST', body });
+    closeCards();
+    loadContacts();
+  } catch (err) {
+    setStatus($('ccStatus'), err.message, 'err');
+  }
+});
+
+// 구글 연락처 가져오기
+$('importBtn').addEventListener('click', () => { setStatus($('importStatus'), ''); openCard('importCard'); });
+$('importPick').addEventListener('click', () => $('importFile').click());
+$('importFile').addEventListener('change', async () => {
+  const file = $('importFile').files[0];
+  $('importFile').value = '';
+  if (!file) return;
+  const st = $('importStatus');
+  setStatus(st, '읽는 중…');
+  try {
+    const text = await file.text();
+    const r = await api('/api/contacts/import', { method: 'POST', body: { text, filename: file.name } });
+    const lines = [`✅ 새로 넣은 사람: ${r.added}명`];
+    if (r.updated) lines.push(`🔁 이미 있어서 그룹만 더한 사람: ${r.updated}명`);
+    if (r.same) lines.push(`👌 이미 있던 사람: ${r.same}명`);
+    if (r.skipped.length) lines.push(`⏭ 휴대폰 번호가 없어서 건너뛴 사람: ${r.skipped.length}명 (${r.skipped.slice(0, 5).join(', ')}${r.skipped.length > 5 ? ' …' : ''})`);
+    setStatus(st, lines.join('\n'), 'ok');
+    if (r.added) kkak();
+    loadContacts();
+  } catch (err) {
+    setStatus(st, err.message, 'err');
+  }
+});
+
+// ===================== 자주 쓰는 문구 =====================
+async function loadTemplates() {
+  ({ templates } = await api('/api/templates'));
+  renderTemplates();
+}
+function useTemplate(t) {
+  const box = $('message');
+  if (box.value.trim() && !confirm('지금 쓴 글을 이 문구로 바꿀까요?')) return;
+  box.value = t.text;
+  $('tplPop').classList.add('hidden');
+  go('write');
+  updateCompose();
+  box.focus();
+}
+function renderTemplates() {
+  const box = $('tplList');
+  box.innerHTML = '';
+  for (const t of templates) {
+    const use = el('button', { type: 'button', className: 'btn small', textContent: '✉️ 이걸로 쓰기' });
+    use.onclick = () => useTemplate(t);
+    const edit = el('button', { type: 'button', className: 'icon-btn', title: '고치기', textContent: '✏️' });
+    edit.onclick = () => openTemplate(t);
+    const del = el('button', { type: 'button', className: 'icon-btn', title: '지우기', textContent: '🗑' });
+    del.onclick = async () => { if (confirm(`「${t.title}」 문구를 지울까요?`)) { await api(`/api/templates/${t.id}`, { method: 'DELETE' }); loadTemplates(); } };
+    box.append(el('div', { className: 'tpl' }, el('div', { className: 'txt' }, el('b', { textContent: t.title }), el('p', { textContent: t.text })), el('div', { className: 'row', style: 'flex-wrap:nowrap' }, use, edit, del)));
+  }
+  if (!templates.length) box.append(el('div', { className: 'empty', textContent: '아직 저장한 문구가 없어요. [＋ 새 문구] 또는 문자 쓰기 화면의 [💾 문구로 저장]으로 만들어 보세요.' }));
+  // 문자 쓰기 화면의 [문구 불러오기] 목록
+  const pop = $('tplPop');
+  pop.innerHTML = '';
+  for (const t of templates) {
+    const b = el('button', { type: 'button' }, el('b', { textContent: t.title }), el('span', { textContent: t.text.replace(/\n/g, ' ') }));
+    b.onclick = () => useTemplate(t);
+    pop.append(b);
+  }
+  if (!templates.length) pop.append(el('div', { className: 'empty', textContent: '저장한 문구가 없어요.' }));
+}
+let editingTpl = null;
+function openTemplate(t, text) {
+  editingTpl = t || null;
+  $('tcTitle').textContent = t ? '문구 고치기' : '새 문구';
+  $('tcName').value = t?.title || '';
+  $('tcText').value = t?.text ?? text ?? '';
+  setStatus($('tcStatus'), '', 'err');
+  tplMeter();
+  openCard('tplCard');
+  $('tcName').focus();
+}
+function tplMeter() {
+  const b = byteLength($('tcText').value);
+  $('tcMeter').textContent = `${b}바이트 · ${b <= SMS_MAX ? '짧은 문자' : '긴 문자'} (이름 넣기 전 기준)`;
+}
+$('tcText').addEventListener('input', tplMeter);
+$('tcNameTag').addEventListener('click', () => insertAtCursor($('tcText'), NAME_TAG, tplMeter));
+$('addTplBtn').addEventListener('click', () => openTemplate(null));
+$('tcSave').addEventListener('click', async () => {
+  try {
+    const body = { title: $('tcName').value, text: $('tcText').value };
+    await api(editingTpl ? `/api/templates/${editingTpl.id}` : '/api/templates', { method: editingTpl ? 'PUT' : 'POST', body });
+    closeCards();
+    loadTemplates();
+  } catch (err) {
+    setStatus($('tcStatus'), err.message, 'err');
+  }
+});
+$('tplBtn').addEventListener('click', (e) => { e.stopPropagation(); $('tplPop').classList.toggle('hidden'); });
+document.addEventListener('click', (e) => { if (!$('tplPop').contains(e.target)) $('tplPop').classList.add('hidden'); });
+$('tplSaveBtn').addEventListener('click', () => {
+  if (!$('message').value.trim()) { alert('먼저 글을 써주세요.'); return; }
+  openTemplate(null, $('message').value);
+});
+
+// ===================== 문자 쓰기 =====================
+function insertAtCursor(box, text, after) {
+  const s = box.selectionStart ?? box.value.length;
+  const e = box.selectionEnd ?? box.value.length;
+  box.value = box.value.slice(0, s) + text + box.value.slice(e);
+  box.focus();
+  box.selectionStart = box.selectionEnd = s + text.length;
+  after?.();
+}
+$('nameBtn').addEventListener('click', () => insertAtCursor($('message'), NAME_TAG, updateCompose));
+$('message').addEventListener('input', updateCompose);
+$('subject').addEventListener('input', updatePreview);
+
+function messagesFor(list) {
+  const text = $('message').value;
+  return list.map((r) => { const body = personalize(text, r); const bytes = byteLength(body); return { ...r, body, bytes, type: bytes <= SMS_MAX ? 'SMS' : 'LMS' }; });
+}
+
+function updateCompose() {
+  const text = $('message').value;
+  const list = recipients();
+  const msgs = messagesFor(list.length ? list : [{ name: '홍길동' }]);
+  const maxBytes = Math.max(...msgs.map((m) => m.bytes));
+  const longCount = msgs.filter((m) => m.type === 'LMS').length;
+  const isLong = maxBytes > SMS_MAX;
+  const limit = isLong ? LMS_MAX : SMS_MAX;
+  const meter = $('meter');
+  meter.innerHTML = '';
+  const kind = el('span', { className: 'kind' + (isLong ? ' long' : ''), textContent: isLong ? (list.length && longCount < msgs.length ? `일부 긴 문자 (${longCount}명)` : '긴 문자') : '짧은 문자' });
+  meter.append(el('b', { textContent: maxBytes }), ` / ${limit}바이트`, kind);
+  meter.title = '한글은 2바이트, 영어·숫자·띄어쓰기는 1바이트예요.' + (text.includes(NAME_TAG) ? ' 이름이 가장 긴 사람 기준이에요.' : '');
+  if (maxBytes > LMS_MAX) meter.style.color = 'var(--err)'; else meter.style.color = '';
+  $('subject').classList.toggle('hidden', !isLong);
+  $('emojiWarn').classList.toggle('hidden', !/\p{Extended_Pictographic}/u.test(text));
+  if (list.length) {
+    const cost = msgs.reduce((s, m) => s + (Number(settings.prices[m.type]) || 0), 0);
+    $('crowSays').textContent = text.trim() ? `${list.length}명에게 보낼 준비 완료! 예상 비용은 약 ${won(cost)}이에요. 깍!` : `${list.length}명을 골랐어요. 이제 글을 써주세요!`;
+  } else {
+    $('crowSays').textContent = text.trim() ? '왼쪽에서 받는 사람을 골라주세요! 그룹을 누르면 한꺼번에 고를 수 있어요.' : '받는 사람을 고르고 글을 쓰면, 제가 콕콕 보내드릴게요! 깍깍~';
+  }
+  updatePreview();
+}
+
+function updatePreview() {
+  const list = recipients();
+  if (pvIndex >= list.length) pvIndex = 0;
+  const who = list[pvIndex] || { name: '', phone: '' };
+  const text = personalize($('message').value, list.length ? who : { name: '(이름)' });
+  $('pvAv').textContent = (who.name || '?').slice(0, 1);
+  $('pvName').textContent = who.name || (who.phone ? fmtPhone(who.phone) : '받는 사람');
+  $('pvPhone').textContent = who.phone ? fmtPhone(who.phone) : '이렇게 받아요';
+  const bytes = byteLength(text);
+  $('pvType').textContent = !text.trim() ? '문자 메시지' : bytes <= SMS_MAX ? '문자 메시지 (SMS)' : '긴 문자 (LMS)';
+  const msg = $('pvMsg');
+  msg.innerHTML = '';
+  msg.className = 'msg' + (text.trim() ? '' : ' empty-msg');
+  const subject = $('subject').value.trim();
+  if (text.trim()) {
+    if (bytes > SMS_MAX && subject) msg.append(el('span', { className: 'sub', textContent: subject }));
+    msg.append(text);
+  } else msg.textContent = '글을 쓰면 여기서 보여드려요';
+  $('pvNav').classList.toggle('hidden', list.length < 2);
+  $('pvIdx').textContent = `${pvIndex + 1} / ${list.length}`;
+}
+$('pvPrev').addEventListener('click', () => { const n = recipients().length; pvIndex = (pvIndex - 1 + n) % n; updatePreview(); });
+$('pvNext').addEventListener('click', () => { pvIndex = (pvIndex + 1) % recipients().length; updatePreview(); });
+
+// ---- 예약 ----
+function localInputValue(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+$('scheduleOn').addEventListener('change', () => {
+  const on = $('scheduleOn').checked;
+  $('scheduleAt').classList.toggle('hidden', !on);
+  $('scheduleHint').classList.toggle('hidden', !on);
+  $('sendBtn').textContent = on ? '⏰ 깍깍! 예약하기' : '🐦‍⬛ 깍깍! 보내기';
+  if (on) {
+    const min = new Date(Date.now() + 5 * 60 * 1000);
+    $('scheduleAt').min = localInputValue(min);
+    if (!$('scheduleAt').value) {
+      const t = new Date(Date.now() + 60 * 60 * 1000); // 기본: 1시간 뒤 정각
+      t.setMinutes(0, 0, 0);
+      $('scheduleAt').value = localInputValue(t);
+    }
+  }
+});
+
+// ---- 보내기: 먼저 확인 창 ----
+function sendBody() {
+  const list = recipients();
+  return {
+    contactIds: list.filter((r) => r.id).map((r) => r.id),
+    extra: list.filter((r) => !r.id).map((r) => ({ phone: r.phone, name: r.name })),
+    text: $('message').value,
+    subject: $('subject').classList.contains('hidden') ? '' : $('subject').value,
+    scheduledAt: $('scheduleOn').checked && $('scheduleAt').value ? new Date($('scheduleAt').value).toISOString() : null,
+  };
+}
+
+$('sendBtn').addEventListener('click', async () => {
+  const body = sendBody();
+  if (!body.text.trim()) { $('crowSays').textContent = '앗, 보낼 글을 먼저 써주세요!'; $('message').focus(); return; }
+  if (!body.contactIds.length && !body.extra.length) { $('crowSays').textContent = '앗, 받는 사람을 먼저 골라주세요!'; return; }
+  if ($('scheduleOn').checked && !body.scheduledAt) { $('crowSays').textContent = '예약할 날짜와 시각을 골라주세요!'; return; }
+  if (!settings.configured) { alert('⚙️ 설정에서 솔라피 열쇠와 보내는 번호를 먼저 넣어주세요.'); go('settings'); return; }
+  let pv;
+  try {
+    pv = await api('/api/preview', { method: 'POST', body });
+  } catch (err) { alert(err.message); return; }
+  const sum = $('cfSum');
+  sum.innerHTML = '';
+  const row = (k, v, cls = '') => sum.append(el('tr', { className: cls }, el('td', { textContent: k }), el('td', { textContent: v })));
+  row('받는 사람', `${pv.recipients}명`);
+  if (pv.count.SMS) row('짧은 문자 (SMS)', `${pv.count.SMS}통 × ${won(settings.prices.SMS)}`);
+  if (pv.count.LMS) row('긴 문자 (LMS)', `${pv.count.LMS}통 × ${won(settings.prices.LMS)}`);
+  row('보내는 번호', fmtPhone(pv.sender));
+  row('언제', body.scheduledAt ? `⏰ ${fmtTime(body.scheduledAt)} (예약)` : '지금 바로');
+  row('예상 비용', `약 ${won(pv.cost)}`, 'total');
+  $('cfTitle').textContent = body.scheduledAt ? '이렇게 예약할까요?' : '이렇게 보낼까요?';
+  $('cfSampleWho').textContent = pv.sample ? `${pv.sample.name || fmtPhone(pv.sample.phone)}님이 받을 문자:` : '';
+  $('cfSample').textContent = pv.sample ? pv.sample.text : '';
+  $('cfProblems').textContent = pv.problems.join('\n');
+  $('cfGo').disabled = pv.problems.length > 0 || !pv.recipients;
+  $('cfGo').textContent = body.scheduledAt ? '⏰ 깍깍! 예약하기' : `🐦‍⬛ ${pv.recipients}명에게 깍깍! 보내기`;
+  $('cfGo').onclick = () => reallySend(body);
+  openCard('confirmCard');
+});
+
+async function reallySend(body) {
+  $('cfGo').disabled = true;
+  $('cfGo').textContent = '보내는 중…';
+  try {
+    const { entry } = await api('/api/send', { method: 'POST', body });
+    closeCards();
+    const bad = entry.recipients.filter((r) => r.state === 'err');
+    const good = entry.recipients.length - bad.length;
+    if (!good) throw new Error(bad.map((r) => `${r.name || fmtPhone(r.phone)}: ${r.note}`).join('\n') || '보내지 못했어요.');
+    $('doneTitle').textContent = entry.scheduledAt ? `⏰ ${good}명에게 예약했어요!` : `✉️ ${good}명에게 보냈어요!`;
+    const lines = [entry.scheduledAt ? `${fmtTime(entry.scheduledAt)}에 솔라피가 보내드려요. 컴퓨터를 꺼도 괜찮아요.` : '받았는지는 🕘 보낸 기록에서 확인할 수 있어요.'];
+    if (bad.length) lines.push('', `⚠️ ${bad.length}명은 보내지 못했어요:`, ...bad.map((r) => `· ${r.name || fmtPhone(r.phone)}: ${r.note}`));
+    setStatus($('doneText'), lines.join('\n'), bad.length ? 'err' : '');
+    openCard('doneCard');
+    celebrate();
+    kkak();
+    $('message').value = '';
+    $('subject').value = '';
+    $('scheduleOn').checked = false;
+    $('scheduleOn').dispatchEvent(new Event('change'));
+    picked.clear();
+    extras = [];
+    renderPick();
+    checkBalance(true);
+  } catch (err) {
+    closeCards();
+    alert(`보내지 못했어요.\n\n${err.message}`);
+    $('crowSays').textContent = '앗, 보내지 못했어요. 이유를 확인해 주세요.';
+  }
+}
+
+// ===================== 보낸 기록 =====================
+const STATE_LABEL = { sent: ['보냄', 'ok'], scheduled: ['⏰ 예약됨', 'wait'], cancelled: ['예약 취소', ''], failed: ['실패', 'err'] };
+async function loadHistory(autoCheck) {
+  ({ history } = await api('/api/history'));
+  renderHistory();
+  // 화면을 열면, 최근 3일 안에 보낸 것 중 아직 "보내는 중"인 것은 알아서 확인 (최대 5개)
+  if (autoCheck) {
+    const recent = history.filter((h) => h.state === 'sent' && Date.now() - new Date(h.time).getTime() < 3 * 86400000 && h.recipients.some((r) => r.state === 'pending')).slice(0, 5);
+    for (const h of recent) await refreshEntry(h.id, true);
+  }
+}
+async function refreshEntry(id, quiet) {
+  try {
+    const { entry } = await api(`/api/history/${id}/refresh`, { method: 'POST' });
+    history = history.map((h) => (h.id === id ? entry : h));
+    renderHistory();
+  } catch (err) { if (!quiet) alert(err.message); }
+}
+function renderHistory() {
+  const box = $('histList');
+  box.innerHTML = '';
+  for (const h of history) {
+    const [label, kind] = STATE_LABEL[h.state] || [h.state, ''];
+    const ok = h.recipients.filter((r) => r.state === 'ok').length;
+    const err = h.recipients.filter((r) => r.state === 'err').length;
+    const wait = h.recipients.length - ok - err;
+    const summary = [`${h.recipients.length}명`, ok && `✅ 받음 ${ok}`, err && `❌ 실패 ${err}`, wait && h.state === 'sent' && `⏳ 보내는 중 ${wait}`].filter(Boolean).join(' · ');
+    const tools = el('div', { className: 'row', style: 'margin-top:6px' });
+    if (h.state === 'sent') {
+      const b = el('button', { type: 'button', className: 'btn small ghost', textContent: '🔄 받았는지 확인' });
+      b.onclick = () => refreshEntry(h.id);
+      tools.append(b);
+    }
+    if (h.state === 'scheduled' && new Date(h.scheduledAt) > new Date()) {
+      const b = el('button', { type: 'button', className: 'btn small danger', textContent: '⏰ 예약 취소' });
+      b.onclick = async () => {
+        if (!confirm('이 예약을 취소할까요? 문자가 보내지지 않아요.')) return;
+        try { const { entry } = await api(`/api/history/${h.id}/cancel`, { method: 'POST' }); history = history.map((x) => (x.id === h.id ? entry : x)); renderHistory(); }
+        catch (e) { alert(e.message); }
+      };
+      tools.append(b);
+    } else if (h.state === 'scheduled') {
+      const b = el('button', { type: 'button', className: 'btn small ghost', textContent: '🔄 받았는지 확인' });
+      b.onclick = () => refreshEntry(h.id);
+      tools.append(b);
+    }
+    const again = el('button', { type: 'button', className: 'btn small ghost', textContent: '✏️ 같은 글 다시 쓰기' });
+    again.onclick = () => {
+      $('message').value = h.text;
+      $('subject').value = h.subject || '';
+      for (const r of h.recipients) { const c = contacts.find((x) => x.phone === r.phone); if (c) picked.add(c.id); else if (!extras.some((e) => e.phone === r.phone)) extras.push({ phone: r.phone, name: r.name }); }
+      renderPick();
+      go('write');
+    };
+    const del = el('button', { type: 'button', className: 'btn small ghost', textContent: '기록 지우기' });
+    del.onclick = async () => { if (confirm('이 기록을 지울까요? (보낸 문자는 그대로예요)')) { ({ history } = await api('/api/history/delete', { method: 'POST', body: { ids: [h.id] } })); renderHistory(); } };
+    tools.append(again, del);
+    box.append(el('div', { className: 'hist' },
+      el('div', { className: 'row between' },
+        el('span', { className: 'when', textContent: fmtTime(h.time) + (h.scheduledAt ? ` → ⏰ ${fmtTime(h.scheduledAt)}` : '') }),
+        el('span', { className: 'state ' + kind, textContent: label })),
+      el('div', { className: 'txt', textContent: (h.subject ? `[${h.subject}] ` : '') + h.text }),
+      el('div', { className: 'hint', textContent: `${summary} · 짧은 ${h.count.SMS} · 긴 ${h.count.LMS} · 약 ${won(h.cost)}` }),
+      el('details', {}, el('summary', { textContent: '받는 사람 보기' }), el('div', { className: 'people' }, ...h.recipients.map((r) => el('span', {
+        className: 'tag ' + ({ ok: 'ok', err: 'err', pending: 'wait' }[r.state] || ''),
+        title: fmtPhone(r.phone),
+        textContent: `${r.name || fmtPhone(r.phone)} · ${r.note}`,
+      })))),
+      tools));
+  }
+  if (!history.length) box.append(el('div', { className: 'empty', textContent: '아직 보낸 문자가 없어요.' }));
+}
+$('clearHistory').addEventListener('click', async () => {
+  if (!history.length || !confirm('보낸 기록을 모두 지울까요? (보낸 문자나 예약은 그대로예요)')) return;
+  ({ history } = await api('/api/history/delete', { method: 'POST', body: {} }));
+  renderHistory();
+});
+
+// ===================== 시작 =====================
+async function start() {
+  try {
+    const status = await api('/api/status');
+    $('build').textContent = status.build;
+    settings = status.settings;
+    showSettings();
+    await Promise.all([loadContacts(), loadTemplates()]);
+    if (settings.configured) checkBalance(true);
+  } catch (err) {
+    $('crowSays').textContent = `앗, 문제가 생겼어요: ${err.message}`;
+  }
+}
+start();
+</script>
+</body>
+</html>
